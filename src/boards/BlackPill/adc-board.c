@@ -20,7 +20,7 @@
  *
  * \author    Gregory Cristian ( Semtech )
  */
-#include "stm32l4xx.h"
+#include "stm32f4xx.h"
 #include "board-config.h"
 #include "adc-board.h"
 
@@ -44,7 +44,7 @@ void AdcMcuInit( Adc_t *obj, PinNames adcInput )
 {
     AdcHandle.Instance = ADC1;
 
-    __HAL_RCC_ADC_CLK_ENABLE( );
+    __HAL_RCC_ADC1_CLK_ENABLE( );
 
     HAL_ADC_DeInit( &AdcHandle );
 
@@ -84,7 +84,7 @@ uint16_t AdcMcuReadChannel( Adc_t *obj, uint32_t channel )
     {
     }
 
-    __HAL_RCC_ADC_CLK_ENABLE( );
+    __HAL_RCC_ADC1_CLK_ENABLE( );
 
     // Calibrate ADC if any calibraiton hardware
     HAL_ADCEx_Calibration_Start( &AdcHandle, ADC_SINGLE_ENDED );
@@ -104,7 +104,7 @@ uint16_t AdcMcuReadChannel( Adc_t *obj, uint32_t channel )
 
     ADC_DISABLE( &AdcHandle );
 
-    __HAL_RCC_ADC_CLK_DISABLE( );
+    __HAL_RCC_ADC1_CLK_DISABLE( );
 
     // Disable HSI
     __HAL_RCC_HSI_DISABLE( );
