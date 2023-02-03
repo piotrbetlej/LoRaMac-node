@@ -1,0 +1,1 @@
+../../mcu/stm32/STM32CubeF4/Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_conf_template.h
