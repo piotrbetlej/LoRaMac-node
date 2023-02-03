@@ -58,7 +58,7 @@ option(CLASSB_ENABLED "Class B support of LoRaMac" OFF)
 if(BOARD STREQUAL BlackPill)
     # Configure toolchain for BlackPill
     set(LINKER_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/boards/BlackPill/cmsis/arm-gcc/STM32F401CDUX_FLASH.ld)
-    include(stm32l4)
+    include(stm32f4)
 
     # Build platform specific board implementation
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/boards/BlackPill)
