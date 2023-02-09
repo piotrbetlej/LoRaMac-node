@@ -30,10 +30,10 @@ message("Linker script: ${LINKER_SCRIPT}")
 #---------------------------------------------------------------------------------------
 
 # Object build options
-set(OBJECT_GEN_FLAGS "-c -O0 -g3 -mthumb -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -Wall -fstack-usage --specs=nano.specs -ffunction-sections -fdata-sections")
+set(OBJECT_GEN_FLAGS "-O0 -g3 -mthumb -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -Wall -fstack-usage --specs=nosys.specs -ffunction-sections -fdata-sections")
 set(CMAKE_C_FLAGS "${OBJECT_GEN_FLAGS} -std=gnu99 " CACHE INTERNAL "C Compiler options")
 set(CMAKE_CXX_FLAGS "${OBJECT_GEN_FLAGS} -std=c++11 " CACHE INTERNAL "C++ Compiler options")
 set(CMAKE_ASM_FLAGS "${OBJECT_GEN_FLAGS} -x assembler-with-cpp " CACHE INTERNAL "ASM Compiler options")
 
 # Linker flags
-set(CMAKE_EXE_LINKER_FLAGS "-Wl,--gc-sections -static --specs=nano.specs --specs=nosys.specs -mthumb -g3 -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=softfp -T${LINKER_SCRIPT} -Wl,-Map=${CMAKE_PROJECT_NAME}.map -Wl,--start-group -lc -lm -lstdc++ -lsupc++ -Wl,--end-group" CACHE INTERNAL "Linker options")
+set(CMAKE_EXE_LINKER_FLAGS "-Wl,--gc-sections -static --specs=nano.specs  -mthumb -g3 -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -T${LINKER_SCRIPT} -Wl,-Map=${CMAKE_PROJECT_NAME}.map -Wl,--start-group -lc -lm -lstdc++ -lsupc++ -Wl,--end-group" CACHE INTERNAL "Linker options")
