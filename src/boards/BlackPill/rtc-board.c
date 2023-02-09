@@ -24,7 +24,7 @@
  */
 #include <math.h>
 #include <time.h>
-#include "stm32l4xx.h"
+#include "stm32f4xx.h"
 #include "utilities.h"
 #include "delay.h"
 #include "board.h"
@@ -145,7 +145,7 @@ static RtcTimerContext_t RtcTimerContext;
  */
 static uint64_t RtcGetCalendarValue( RTC_DateTypeDef* date, RTC_TimeTypeDef* time );
 
-void RtcInit( void )
+void RtcInit_( void )
 {
     RTC_DateTypeDef date;
     RTC_TimeTypeDef time;
@@ -184,6 +184,84 @@ void RtcInit( void )
 
         HAL_NVIC_SetPriority( RTC_Alarm_IRQn, 1, 0 );
         HAL_NVIC_EnableIRQ( RTC_Alarm_IRQn );
+
+        // Init alarm.
+        HAL_RTC_DeactivateAlarm( &RtcHandle, RTC_ALARM_A );
+
+        RtcSetTimerContext( );
+        RtcInitialized = true;
+    }
+}
+
+void Error_Handler(void)
+{
+    while(1){};
+}
+
+void HAL_RTC_MspInit(RTC_HandleTypeDef* hrtc)
+{
+  RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
+  if(hrtc->Instance==RTC)
+  {
+  /* USER CODE BEGIN RTC_MspInit 0 */
+
+  /* USER CODE END RTC_MspInit 0 */
+
+  /** Initializes the peripherals clock
+  */
+    PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_RTC;
+    PeriphClkInitStruct.RTCClockSelection = RCC_RTCCLKSOURCE_LSI;
+    if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
+    {
+      Error_Handler();
+    }
+
+    /* Peripheral clock enable */
+    __HAL_RCC_RTC_ENABLE();
+    /* RTC interrupt Init */
+    HAL_NVIC_SetPriority(RTC_Alarm_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(RTC_Alarm_IRQn);
+  /* USER CODE BEGIN RTC_MspInit 1 */
+
+  /* USER CODE END RTC_MspInit 1 */
+  }
+
+}
+
+void RtcInit( void )
+{
+    RTC_DateTypeDef date;
+    RTC_TimeTypeDef time;
+
+    if( RtcInitialized == false )
+    {
+        RtcHandle.Instance            = RTC;
+        RtcHandle.Init.HourFormat     = RTC_HOURFORMAT_24;
+        RtcHandle.Init.AsynchPrediv   = PREDIV_A;  // RTC_ASYNCH_PREDIV;
+        RtcHandle.Init.SynchPrediv    = PREDIV_S;  // RTC_SYNCH_PREDIV;
+        RtcHandle.Init.OutPut         = RTC_OUTPUT_DISABLE;
+        RtcHandle.Init.OutPutPolarity = RTC_OUTPUT_POLARITY_HIGH;
+        RtcHandle.Init.OutPutType     = RTC_OUTPUT_TYPE_OPENDRAIN;
+        HAL_RTC_Init( &RtcHandle );
+
+        /*at 0:0:0*/
+        time.Hours                    = 0;
+        time.Minutes                  = 0;
+        time.Seconds                  = 0;
+        time.SubSeconds               = 0;
+        time.TimeFormat               = 0;
+        time.StoreOperation           = RTC_STOREOPERATION_RESET;
+        time.DayLightSaving           = RTC_DAYLIGHTSAVING_NONE;
+        HAL_RTC_SetTime( &RtcHandle, &time, RTC_FORMAT_BIN );
+
+        date.Year                     = 0;
+        date.Month                    = RTC_MONTH_JANUARY;
+        date.Date                     = 1;
+        date.WeekDay                  = RTC_WEEKDAY_MONDAY;
+        HAL_RTC_SetDate( &RtcHandle, &date, RTC_FORMAT_BIN );
+
+        // Enable Direct Read of the calendar registers (not through Shadow registers)
+        HAL_RTCEx_EnableBypassShadow( &RtcHandle );
 
         // Init alarm.
         HAL_RTC_DeactivateAlarm( &RtcHandle, RTC_ALARM_A );
