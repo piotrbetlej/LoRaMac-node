@@ -32,11 +32,7 @@
   * @param __HANDLE__ ADC handle.
   * @retval None
   */
-#define ADC_DISABLE(__HANDLE__)                                          \
-  do{                                                                          \
-         (__HANDLE__)->Instance->CR |= ADC_CR_ADDIS;                           \
-          __HAL_ADC_CLEAR_FLAG((__HANDLE__), (ADC_FLAG_EOSMP | ADC_FLAG_RDY)); \
-  } while(0)
+#define ADC_DISABLE(__HANDLE__) __HAL_ADC_DISABLE(__HANDLE__)
 
 ADC_HandleTypeDef AdcHandle;
 
@@ -57,9 +53,10 @@ void AdcMcuInit( Adc_t *obj, PinNames adcInput )
 void AdcMcuConfig( void )
 {
     // Configure ADC
-    AdcHandle.Init.ClockPrescaler        = ADC_CLOCK_SYNC_PCLK_DIV1;
+    AdcHandle.Init.ClockPrescaler        = ADC_CLOCK_SYNC_PCLK_DIV2;
     AdcHandle.Init.Resolution            = ADC_RESOLUTION_12B;
     AdcHandle.Init.DataAlign             = ADC_DATAALIGN_RIGHT;
+    AdcHandle.Init.ScanConvMode = DISABLE;
     AdcHandle.Init.ContinuousConvMode    = DISABLE;
     AdcHandle.Init.DiscontinuousConvMode = DISABLE;
     AdcHandle.Init.ExternalTrigConvEdge  = ADC_EXTERNALTRIGCONVEDGE_NONE;
@@ -67,7 +64,6 @@ void AdcMcuConfig( void )
     AdcHandle.Init.DMAContinuousRequests = DISABLE;
     AdcHandle.Init.EOCSelection          = ADC_EOC_SINGLE_CONV;
     AdcHandle.Init.NbrOfConversion       = 1;
-    AdcHandle.Init.LowPowerAutoWait      = DISABLE;
     HAL_ADC_Init( &AdcHandle );
 }
 
@@ -87,11 +83,11 @@ uint16_t AdcMcuReadChannel( Adc_t *obj, uint32_t channel )
     __HAL_RCC_ADC1_CLK_ENABLE( );
 
     // Calibrate ADC if any calibraiton hardware
-    HAL_ADCEx_Calibration_Start( &AdcHandle, ADC_SINGLE_ENDED );
+    // HAL_ADCEx_Calibration_Start( &AdcHandle, ADC_SINGLE_ENDED );
 
     adcConf.Channel = channel;
-    adcConf.Rank = ADC_REGULAR_RANK_1;
-    adcConf.SamplingTime = ADC_SAMPLETIME_92CYCLES_5;
+    adcConf.Rank = 1;
+    adcConf.SamplingTime = ADC_SAMPLETIME_3CYCLES;
 
     HAL_ADC_ConfigChannel( &AdcHandle, &adcConf );
 
