@@ -20,7 +20,7 @@
  *
  * \author    Gregory Cristian ( Semtech )
  */
-#include "stm32l4xx.h"
+#include "stm32f4xx.h"
 #include "utilities.h"
 #include "gpio.h"
 #include "adc.h"
@@ -142,7 +142,7 @@ void BoardInitMcu( void )
         FifoInit( &Uart2.FifoRx, Uart2RxBuffer, UART2_FIFO_RX_SIZE );
         // Configure your terminal for 8 Bits data (7 data bit + 1 parity bit), no parity and no flow ctrl
         UartInit( &Uart2, UART_2, UART_TX, UART_RX );
-        UartConfig( &Uart2, RX_TX, 921600, UART_8_BIT, UART_1_STOP_BIT, NO_PARITY, NO_FLOW_CTRL );
+        UartConfig( &Uart2, RX_TX, 115200, UART_8_BIT, UART_1_STOP_BIT, NO_PARITY, NO_FLOW_CTRL );
 
         RtcInit( );
 
@@ -352,45 +352,38 @@ static void BoardUnusedIoInit( void )
 
 void SystemClockConfig( void )
 {
-    RCC_OscInitTypeDef RCC_OscInitStruct = { 0 };
-    RCC_ClkInitTypeDef RCC_ClkInitStruct = { 0 };
-    RCC_PeriphCLKInitTypeDef PeriphClkInit = { 0 };
 
-    __HAL_RCC_PWR_CLK_ENABLE( );
+    RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+    RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
 
-    __HAL_PWR_VOLTAGESCALING_CONFIG( PWR_REGULATOR_VOLTAGE_SCALE1 );
+    /** Configure the main internal regulator output voltage
+     */
+    __HAL_RCC_PWR_CLK_ENABLE();
+    __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE2);
 
-    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_MSI | RCC_OSCILLATORTYPE_LSE;
-    RCC_OscInitStruct.MSIState            = RCC_MSI_ON;
-    RCC_OscInitStruct.LSEState            = RCC_LSE_ON;
-    RCC_OscInitStruct.MSIClockRange       = RCC_MSIRANGE_6;
-    RCC_OscInitStruct.MSICalibrationValue = RCC_MSICALIBRATION_DEFAULT;
-    RCC_OscInitStruct.PLL.PLLState        = RCC_PLL_ON;
-    RCC_OscInitStruct.PLL.PLLSource       = RCC_PLLSOURCE_MSI;
-    RCC_OscInitStruct.PLL.PLLM            = 1;
-    RCC_OscInitStruct.PLL.PLLN            = 40;
-    RCC_OscInitStruct.PLL.PLLP            = RCC_PLLP_DIV7;
-    RCC_OscInitStruct.PLL.PLLQ            = RCC_PLLQ_DIV4;
-    RCC_OscInitStruct.PLL.PLLR            = RCC_PLLR_DIV2;
-    if( HAL_RCC_OscConfig( &RCC_OscInitStruct ) != HAL_OK )
+    /** Initializes the RCC Oscillators according to the specified parameters
+     * in the RCC_OscInitTypeDef structure.
+     */
+    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI|RCC_OSCILLATORTYPE_LSI;
+    RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+    RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
+    RCC_OscInitStruct.LSIState = RCC_LSI_ON;
+    RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
+    if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
     {
         assert_param( LMN_STATUS_ERROR );
     }
 
-    RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | 
-                                  RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
-    RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+    /** Initializes the CPU, AHB and APB buses clocks
+     */
+    RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+    RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
     RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
     RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
     RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
-    if( HAL_RCC_ClockConfig( &RCC_ClkInitStruct, FLASH_LATENCY_4 ) != HAL_OK )
-    {
-        assert_param( LMN_STATUS_ERROR );
-    }
 
-    PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_RTC;
-    PeriphClkInit.RTCClockSelection = RCC_RTCCLKSOURCE_LSE;
-    if( HAL_RCCEx_PeriphCLKConfig( &PeriphClkInit ) != HAL_OK )
+    if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
     {
         assert_param( LMN_STATUS_ERROR );
     }
@@ -414,17 +407,14 @@ static void PVD_Config( void )
     PWR_PVDTypeDef sConfigPVD;
     sConfigPVD.PVDLevel = PWR_PVDLEVEL_6;
     sConfigPVD.Mode     = PWR_PVD_MODE_IT_RISING;
-    if( HAL_PWR_ConfigPVD( &sConfigPVD ) != HAL_OK )
-    { 
-        assert_param( LMN_STATUS_ERROR );
-    }
+    HAL_PWR_ConfigPVD( &sConfigPVD );
 
     // Enable PVD
     HAL_PWR_EnablePVD( );
 
     // Enable and set PVD Interrupt priority
-    HAL_NVIC_SetPriority( PVD_PVM_IRQn, 0, 0 );
-    HAL_NVIC_EnableIRQ( PVD_PVM_IRQn );
+    HAL_NVIC_SetPriority( PVD_IRQn, 0, 0 );
+    HAL_NVIC_EnableIRQ( PVD_IRQn );
 }
 
 /*!
