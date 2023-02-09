@@ -20,7 +20,7 @@
  *
  * \author    Gregory Cristian ( Semtech )
  */
-#include "stm32l4xx.h"
+#include "stm32f4xx.h"
 #include "utilities.h"
 #include "board-config.h"
 #include "i2c-board.h"
@@ -53,20 +53,10 @@ void I2cMcuFormat( I2c_t *obj, I2cMode mode, I2cDutyCycle dutyCycle, bool I2cAck
 {
     __HAL_RCC_I2C1_CLK_ENABLE( );
 
-    if( I2cFrequency == 100000 )
-    {
-        I2cHandle.Init.Timing = 0x10909CEC;
-    }
-    else if( I2cFrequency == 400000 )
-    {
-        I2cHandle.Init.Timing = 0x00702991;
-    }
-
     I2cHandle.Init.OwnAddress1 = 0;
     I2cHandle.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
     I2cHandle.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
     I2cHandle.Init.OwnAddress2 = 0;
-    I2cHandle.Init.OwnAddress2Masks = I2C_OA2_NOMASK;
     I2cHandle.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
     I2cHandle.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
 
