@@ -1,0 +1,20 @@
+# Execute in build directory
+cmake -DCMAKE_BUILD_TYPE=Release \
+        -DTOOLCHAIN_PREFIX="/opt/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi" \
+        -DCMAKE_TOOLCHAIN_FILE="../cmake/toolchain-arm-none-eabi.cmake" \
+        -DAPPLICATION="ping-pong" \
+        -DCLASSB_ENABLED="ON" \
+        -DACTIVE_REGION="LORAMAC_REGION_EU868" \
+        -DREGION_EU868="ON" \
+        -DREGION_US915="OFF" \
+        -DREGION_CN779="OFF" \
+        -DREGION_EU433="OFF" \
+        -DREGION_AU915="OFF" \
+        -DREGION_AS923="OFF" \
+        -DREGION_CN470="OFF" \
+        -DREGION_KR920="OFF" \
+        -DREGION_IN865="OFF" \
+        -DREGION_RU864="OFF" \
+        -DBOARD="BlackPill" \
+        -DMBED_RADIO_SHIELD="SX1276MB1MAS" \
+        -DUSE_RADIO_DEBUG="ON" ..
